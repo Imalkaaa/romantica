@@ -1,7 +1,8 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Heart, MessageCircle, Menu, X } from 'lucide-react';
+import { Heart, MessageCircle, Menu, X, ShoppingCart } from 'lucide-react';
 import { useState } from 'react';
+import { motion } from 'framer-motion';
 import { createGeneralWhatsAppUrl } from '../utils/whatsapp';
 
 interface LayoutProps {
@@ -25,70 +26,115 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
   };
 
+  // Animation variants for nav links
+  const linkVariants = {
+    hover: {
+      scale: 1.1,
+      color: '#db2777',
+      transition: { duration: 0.3, ease: 'easeOut' }
+    },
+    active: {
+      scale: 1.05,
+      color: '#db2777',
+      borderBottomWidth: '2px',
+      borderBottomColor: '#db2777'
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-pink-50 to-white">
       {/* Header */}
-      <header className="bg-white/95 backdrop-blur-sm border-b border-pink-100 sticky top-0 z-50">
+      <header className="bg-white/10 backdrop-blur-md border-b border-white/20 sticky top-0 z-50 shadow-lg">
         <div className="container mx-auto px-4 py-4">
           <div className="flex justify-between items-center">
             {/* Logo */}
-            <Link to="/" className="flex items-center space-x-2">
-              <div className="bg-gradient-to-r from-pink-200 to-rose-300 p-2 rounded-full">
-                <Heart className="h-6 w-6 text-pink-600 fill-current" />
-              </div>
-              <span className="text-2xl font-bold bg-gradient-to-r from-pink-600 to-rose-600 bg-clip-text text-transparent">
+            <Link to="/" className="flex items-center space-x-2 group">
+              <motion.div 
+                className="bg-gradient-to-r from-pink-200 to-rose-300 p-3 rounded-full shadow-md group-hover:shadow-xl group-hover:shadow-pink-300/50 transition-all duration-300"
+                animate={{ scale: [1, 1.05, 1] }}
+                transition={{ repeat: Infinity, duration: 3 }}
+              >
+                <Heart className="h-7 w-7 text-pink-600 fill-current" />
+              </motion.div>
+              <span className="text-2xl font-bold bg-gradient-to-r from-pink-600 to-rose-600 bg-clip-text text-transparent tracking-tight group-hover:scale-105 transition-transform duration-300">
                 Romantica
               </span>
             </Link>
 
             {/* Desktop Navigation */}
-            <nav className="hidden md:flex space-x-8">
+            <nav className="hidden md:flex space-x-10 items-center">
               {navigation.map((item) => (
-                <Link
+                <motion.div
                   key={item.path}
-                  to={item.path}
-                  className={`font-medium transition-colors hover:text-pink-600 ${
-                    location.pathname === item.path
-                      ? 'text-pink-600 border-b-2 border-pink-600'
-                      : 'text-gray-700'
-                  }`}
+                  variants={linkVariants}
+                  whileHover="hover"
+                  animate={location.pathname === item.path ? 'active' : ''}
                 >
-                  {item.name}
-                </Link>
+                  <Link
+                    to={item.path}
+                    className="font-medium text-gray-800 text-lg transition-colors"
+                  >
+                    {item.name}
+                  </Link>
+                </motion.div>
               ))}
+              {/* Cart Icon */}
+              <Link
+                to="/cart"
+                className="relative group"
+                aria-label="View Cart"
+              >
+                <motion.div
+                  whileHover={{ scale: 1.2, rotate: 5 }}
+                  transition={{ type: 'spring', stiffness: 300 }}
+                >
+                  <ShoppingCart className="h-6 w-6 text-pink-600" />
+                  <span className="absolute -top-2 -right-2 bg-rose-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                    0
+                  </span>
+                </motion.div>
+              </Link>
             </nav>
 
             {/* Mobile Menu Button */}
             <button
-              className="md:hidden p-2 rounded-lg hover:bg-pink-50 transition-colors"
+              className="md:hidden p-2 rounded-lg bg-white/20 hover:bg-pink-100/30 transition-colors"
               onClick={toggleMobileMenu}
             >
               {isMobileMenuOpen ? (
-                <X className="h-6 w-6 text-gray-700" />
+                <X className="h-6 w-6 text-gray-800" />
               ) : (
-                <Menu className="h-6 w-6 text-gray-700" />
+                <Menu className="h-6 w-6 text-gray-800" />
               )}
             </button>
           </div>
 
           {/* Mobile Navigation */}
           {isMobileMenuOpen && (
-            <nav className="md:hidden mt-4 py-4 border-t border-pink-100">
+            <nav className="md:hidden mt-4 py-4 border-t border-pink-100/50 bg-white/10 backdrop-blur-sm rounded-lg">
               <div className="flex flex-col space-y-3">
                 {navigation.map((item) => (
                   <Link
                     key={item.path}
                     to={item.path}
-                    className={`font-medium px-3 py-2 rounded-lg transition-colors ${
+                    className={`font-medium px-4 py-3 rounded-lg transition-all duration-300 ${
                       location.pathname === item.path
-                        ? 'text-pink-600 bg-pink-50'
-                        : 'text-gray-700 hover:text-pink-600 hover:bg-pink-50'
+                        ? 'text-pink-600 bg-pink-50/50'
+                        : 'text-gray-800 hover:text-pink-600 hover:bg-pink-50/30'
                     }`}
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
                     {item.name}
                   </Link>
                 ))}
+                <Link
+                  to="/cart"
+                  className="flex items-center gap-2 px-4 py-3 rounded-lg text-gray-800 hover:text-pink-600 hover:bg-pink-50/30 transition-all duration-300"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  <ShoppingCart className="h-5 w-5" />
+                  Cart
+                </Link>
               </div>
             </nav>
           )}
